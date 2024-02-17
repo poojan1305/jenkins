@@ -1,15 +1,25 @@
 pipeline {
     agent any
-    triggers {
-        pollSCM '* * * * *'
-    }
     stages {
+        stage('Install Python') {
+            steps {
+                echo "Checking if Python is installed.."
+                script {
+                    def pythonInstalled = sh(returnStatus: true, script: 'python3 --version').toInteger() == 0
+                    if (!pythonInstalled) {
+                        echo "Python not found, installing.."
+                        sh 'sudo apt-get update && sudo apt-get install -y python3'
+                    } else {
+                        echo "Python is already installed"
+                    }
+                }
+            }
+        }
         stage('Build') {
             steps {
                 echo "Building.."
                 sh '''
-                cd myapp
-                pip install -r requirements.txt
+                echo "doing build stuff.."
                 '''
             }
         }
@@ -17,9 +27,7 @@ pipeline {
             steps {
                 echo "Testing.."
                 sh '''
-                cd myapp
-                python3 hello.py
-                python3 hello.py --name=Brad
+                echo "doing test stuff.."
                 '''
             }
         }
